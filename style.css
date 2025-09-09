@@ -1,0 +1,17 @@
+body {
+    background-color: #f8f9fa;
+}
+
+h2, h4 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    font-size: 12px;
+    text-align: left;
+}
+
+.btn {
+    font-size: 12px;
+}
