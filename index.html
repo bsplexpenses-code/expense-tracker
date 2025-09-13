@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Expense Tracker</title>
+  <title>BSPL Reimbursement Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -12,12 +12,86 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
+  <style>
+/* General splash screen */
+#splash {
+  background: #f8f9fa;   /* clean light background */
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* Coins image in bottom-left corner */
+#splash-coins {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;          /* half the splash screen width */
+  max-width: 400px;    /* optional max size */
+  height: auto;        /* maintain aspect ratio */
+  opacity: 0.8;        /* slightly transparent for professional look */
+  z-index: 0;          /* behind text */
+  pointer-events: none;
+}
+
+/* Splash text */
+#splash h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0d6efd;
+  margin-bottom: 10px;
+  z-index: 1;          /* above coins */
+}
+
+#splash p {
+  font-size: 14px;
+  color: #495057;
+  animation: fadeIn 2s ease-in-out;
+}
+/* Fade animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  #splash-coins {
+    width: 50%;   /* coins take more width on smaller screens */
+  }
+
+  #splash h2 {
+    font-size: 22px;
+  }
+
+  #splash p {
+    font-size: 14px;
+  }
+}
+
+</style>
 <body class="bg-light">
 
 <!-- Splash Screen -->
-<div id="splash" class="d-flex justify-content-center align-items-center vh-100">
-  <img src="assets/logo.png" alt="Logo" style="width:200px;">
+<!-- Splash Screen -->
+<div id="splash" class="vh-100 d-flex flex-column justify-content-center align-items-center text-blue">
+  <div class="coins-bg"></div>
+  <img src="assets/coins.png" alt="Coins" id="splash-coins">
+  <h2 style="z-index:2; margin-top:20px;">Reimbursement Portal</h2>
+  <p style="z-index:2;">Manage your expenses with ease</p>
+
+  <!-- Coins in bottom-left -->
+  
 </div>
+
 
 <!-- Loading -->
 <div id="loading" class="d-none d-flex justify-content-center align-items-center vh-100">
@@ -28,7 +102,7 @@
 
 <!-- Main -->
 <div class="container py-3 d-none" id="main-content">
-  <h3 class="text-center mb-4">Expense Tracker</h3>
+  <h3 class="text-center mb-">Expense Tracker</h3>
 
   <!-- Login Section -->
   <div id="login-section" class="d-flex justify-content-center align-items-center vh-100">
