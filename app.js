@@ -198,6 +198,11 @@ function addFilterOptions(role) {
         </select>
       </div>
       <div class="col-auto">
+        <select id="filter-status-${role}" class="form-select form-select-sm">
+          <option value="">All Status</option>
+        </select>
+      </div>
+      <div class="col-auto">
         <button id="apply-filter-${role}" class="btn btn-sm btn-primary">Apply</button>
         <button id="reset-filter-${role}" class="btn btn-sm btn-secondary ms-1">Reset</button>
       </div>
@@ -237,6 +242,7 @@ async function populateFilterOptions(role) {
   const categories = new Set();
   const types = new Set();
   const months = new Set();
+  const status = new Set();
 
   q.forEach(docSnap => {
     const e = docSnap.data();
@@ -259,11 +265,13 @@ async function populateFilterOptions(role) {
   const catsA = Array.from(categories).sort();
   const typesA = Array.from(types).sort();
   const monthsA = Array.from(months).sort((a,b) => b.localeCompare(a)); // newest first
+  const statusA = Array.from(status).sort();
 
   const nameSel = document.getElementById(`filter-name-${role}`);
   const catSel  = document.getElementById(`filter-category-${role}`);
   const typeSel = document.getElementById(`filter-type-${role}`);
   const monthSel = document.getElementById(`filter-month-${role}`);
+  const statusSel = document.getElementById(`filter-status-${role}`);
 
   if (nameSel) {
     nameSel.innerHTML = `<option value="">All Names</option>` + namesA.map(n => `<option value="${escapeHtmlAttr(n)}">${n}</option>`).join("");
@@ -276,6 +284,9 @@ async function populateFilterOptions(role) {
   }
   if (monthSel) {
     monthSel.innerHTML = `<option value="">All Months</option>` + monthsA.map(m => `<option value="${m}">${m}</option>`).join("");
+  }
+  if (statusSel) {
+  statusSel.innerHTML = `<option value="">All Status</option>` + statusA.map(s => `<option value="${escapeHtmlAttr(s)}">${s}</option>`).join("");
   }
 }
 
@@ -290,6 +301,7 @@ async function applyFilters(role) {
   const categoryFilter = (document.getElementById(`filter-category-${role}`) || {value:""}).value;
   const typeFilter = (document.getElementById(`filter-type-${role}`) || {value:""}).value;
   const monthFilter = (document.getElementById(`filter-month-${role}`) || {value:""}).value; // yyyy-mm
+  const statusFilter = (document.getElementById(`filter-status-${role}`) || {value:""}).value;
 
   const docs = [];
   const q = await getDocs(collection(db, "expenses"));
@@ -323,7 +335,8 @@ async function applyFilters(role) {
     if ((nameFilter && e.name !== nameFilter) ||
         (categoryFilter && e.category !== categoryFilter) ||
         (typeFilter && e.type !== typeFilter) ||
-        (monthFilter && eMonth !== monthFilter)) {
+        (monthFilter && eMonth !== monthFilter) ||
+        (statusFilter && e.status !== statusFilter)) {
       return;
     }
 
@@ -620,3 +633,11 @@ if ("serviceWorker" in navigator) {
     console.log("Service Worker registered.");
   }).catch(err => console.warn("SW register failed:", err));
 }
+document.getElementById("export-excel").addEventListener("click", () => {
+  const table = document.getElementById("admin-expenses-table"); // change for role-specific table
+  if (!table) return;
+
+  // Convert HTML table to worksheet
+  const wb = XLSX.utils.table_to_book(table, { sheet: "Expenses" });
+  XLSX.writeFile(wb, `Expenses_${new Date().toISOString().slice(0,10)}.xlsx`);
+});

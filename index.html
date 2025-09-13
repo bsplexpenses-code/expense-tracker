@@ -8,6 +8,8 @@
   <link rel="icon" href="icons/icon-192.png" type="image/png">
   <meta name="theme-color" content="#0d6efd">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
@@ -145,6 +147,8 @@
         </select>
         <button type="submit" class="btn btn-success w-100">Create User</button>
       </form>
+      <button id="export-excel" class="btn btn-success btn-sm mb-2">Export to Excel</button>
+
       <div class="table-responsive">
         <table class="table table-bordered table-striped table-sm">
           <thead class="table-dark">
@@ -195,6 +199,8 @@
         <select id="approverSelect" class="form-select mb-2" required></select>
         <button type="submit" class="btn btn-primary w-100">Submit Expense</button>
       </form>
+      <button id="export-excel" class="btn btn-success btn-sm mb-2">Export to Excel</button>
+
       <div class="table-responsive">
         <table class="table table-bordered table-striped table-sm">
           <thead class="table-dark">
