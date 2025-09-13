@@ -16,7 +16,7 @@ const db = getFirestore(app);
 
 // ==== EMAILJS ====
 const EMAILJS_PUBLIC_KEY = "1FRUAJTvM8PuPj_DE";
-const EMAILJS_SERVICE_ID = "service_pid87zv";
+const EMAILJS_SERVICE_ID = "service_d5zbdnp";
 const TEMPLATE_SUBMISSION = "template_4756h8m";   // Notify approver
 const TEMPLATE_DECISION = "template_49a6dfs";     // Approved/Rejected
 emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -141,10 +141,21 @@ async function loadApprovers() {
 }
 
 // ==== TL SUBMIT EXPENSE ====
+// ==== TL SUBMIT EXPENSE ====
 document.getElementById("expense-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const empID = document.getElementById("expense-employee-id").value;
   const empName = document.getElementById("expense-employee-id").selectedOptions[0].text.split("(")[0].trim();
+
+  // get TL email from users collection
+  const tlSnap = await getDoc(doc(db, "users", empID));
+  let tlEmail = "";
+  if (tlSnap.exists()) {
+    const tlData = tlSnap.data();
+    if (tlData.role === "tl") {
+      tlEmail = tlData.email;
+    }
+  }
 
   const expenseData = {
     empID,
@@ -158,6 +169,7 @@ document.getElementById("expense-form").addEventListener("submit", async (e) => 
     amount: document.getElementById("amount").value,
     status: "Pending",
     approverEmail: document.getElementById("approverSelect").value,
+    tlEmail: tlEmail,  // ✅ store TL’s email
     submittedBy: "TL",
     createdAt: Date.now()
   };
@@ -233,14 +245,21 @@ async function loadApproverExpenses() {
 }
 
 // ==== APPROVE ====
-window.approveExpense = async (expID, empID, name, approverEmail) => {
+// ==== APPROVE ====
+window.approveExpense = async (expID, empID, name) => {
   await updateDoc(doc(db, "expenses", expID), { status: "Approved" });
   Swal.fire("Approved", "Expense Approved!", "success");
 
-  // Fetch employee + TL email
+  // Get expense (to fetch TL email)
+  const expSnap = await getDoc(doc(db, "expenses", expID));
+  const expData = expSnap.exists() ? expSnap.data() : {};
+
+  // Get employee email
   const empSnap = await getDoc(doc(db, "users", empID));
   const empEmail = empSnap.exists() ? empSnap.data().email : "";
-  const tlEmail = approverEmail; // assuming TL’s email provided as approverEmail
+
+  // ✅ Correct TL email (from expense data)
+  const tlEmail = expData.tlEmail || "";
 
   // Notify Employee + TL + Admin
   emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_DECISION, {
@@ -255,13 +274,18 @@ window.approveExpense = async (expID, empID, name, approverEmail) => {
 };
 
 // ==== REJECT ====
-window.rejectExpense = async (expID, empID, name, approverEmail) => {
+window.rejectExpense = async (expID, empID, name) => {
   await updateDoc(doc(db, "expenses", expID), { status: "Rejected" });
   Swal.fire("Rejected", "Expense Rejected!", "warning");
 
+  const expSnap = await getDoc(doc(db, "expenses", expID));
+  const expData = expSnap.exists() ? expSnap.data() : {};
+
   const empSnap = await getDoc(doc(db, "users", empID));
   const empEmail = empSnap.exists() ? empSnap.data().email : "";
-  const tlEmail = approverEmail;
+
+  // ✅ Correct TL email
+  const tlEmail = expData.tlEmail || "";
 
   emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_DECISION, {
     to_email: [empEmail, tlEmail, adminEmail].filter(Boolean).join(","),
@@ -273,6 +297,7 @@ window.rejectExpense = async (expID, empID, name, approverEmail) => {
   loadApproverExpenses();
   loadAdminExpenses();
 };
+
 
 // ==== LOAD ADMIN ALL EXPENSES ====
 async function loadAdminExpenses() {
